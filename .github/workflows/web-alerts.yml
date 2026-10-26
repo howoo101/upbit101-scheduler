@@ -1,0 +1,35 @@
+name: web-alerts
+on:
+  schedule:
+    - cron: "7,17,27,37,47,57 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: web-alerts
+  cancel-in-progress: false
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Check web push conditions
+        shell: python
+        run: |
+          import json, os, urllib.request
+          audience = "https://upbit101.vercel.app/api/cron/alerts"
+          req = urllib.request.Request(os.environ["ACTIONS_ID_TOKEN_REQUEST_URL"] + "&audience=" + audience,
+              headers={"Authorization": "Bearer " + os.environ["ACTIONS_ID_TOKEN_REQUEST_TOKEN"]})
+          with urllib.request.urlopen(req, timeout=15) as response:
+              token = json.load(response)["value"]
+          # Up to two registered accounts per run. No account data or tokens in logs.
+          for index in range(2):
+              req = urllib.request.Request(audience, headers={"Authorization": "Bearer " + token})
+              with urllib.request.urlopen(req, timeout=70) as response:
+                  result = json.load(response)
+              if result.get("delivery_failed"):
+                  raise RuntimeError("Push provider delivery failed; check app notification history.")
+              print("Alert check completed:", index + 1, "checked:", result.get("checked", 0), "sent:", result.get("sent", 0))
+              if result.get("empty"):
+                  break
