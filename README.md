@@ -3,8 +3,8 @@
 This public repository contains only the scheduler for https://upbit101.vercel.app.
 It does not contain application source, exchange credentials, account data or shared secrets.
 
-The standard GitHub-hosted Ubuntu runner invokes the authenticated endpoint every ten minutes
-(at minutes 7, 17, 27, 37, 47 and 57). Each invocation checks up to two registered accounts.
+The standard GitHub-hosted Ubuntu runner invokes the authenticated endpoint every five minutes
+(at minutes 2, 7, 12, 17, 22, 27, 32, 37, 42, 47, 52 and 57). Each invocation checks up to two registered accounts.
 The server authenticates short-lived GitHub OIDC tokens and sends Web Push to registered devices.
 Logs contain only execution counts; the token is never printed. No checkout, artifact or cache is used.
 
